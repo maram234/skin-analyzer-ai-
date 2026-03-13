@@ -8,7 +8,6 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -39,6 +38,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.post("/analyze")
 async def analyze_skin(file: UploadFile = File(...)):
@@ -125,6 +125,8 @@ CRITICAL: Keep the keys in "quantitative_scoring" EXACTLY as (Acne, Hydration, e
     except Exception as e:
         return {"error": str(e)}
 
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+

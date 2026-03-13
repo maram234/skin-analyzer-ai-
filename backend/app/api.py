@@ -36,8 +36,10 @@ model = genai.GenerativeModel(
     }
 )
 
+
 def get_image_hash(image_bytes):
     return hashlib.md5(image_bytes).hexdigest()
+
 
 @app.post("/analyze")
 async def analyze_skin(file: UploadFile = File(...)):
@@ -165,3 +167,4 @@ CRITICAL RULES:
                 "message_ar": f"فشل التحليل: {str(e)}"
             }
         }
+
