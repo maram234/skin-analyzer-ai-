@@ -352,8 +352,8 @@ const analysisResult = ref(null)
 const apiError = ref(null)
 const capturedImage = ref(null)
 
-// التعديل: استهداف بورت البايثون مباشرة
-const API_BASE_URL = "http://127.0.0.1:8000"
+// عنوان الـ API: من متغير البيئة في Vercel أو القيمة الافتراضية للتطوير المحلي
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000"
 
 const summaryText = computed(() => {
   if (!analysisResult.value || !analysisResult.value[currentLang.value]) return ""
