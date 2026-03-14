@@ -33,11 +33,11 @@
       </p>
     </div>
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start relative">
 
       <!-- Scanning Module -->
-      <section class="lg:col-span-5 sticky top-10 animate-fade-left">
-        <div class="relative glass-premium rounded-[3rem] p-5 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden">
+      <section class="lg:col-span-5 sticky top-10 z-20 animate-fade-left">
+        <div class="relative z-20 glass-premium bg-[#050505]/95 rounded-[3rem] p-5 border border-white/10 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.9)] overflow-hidden">
           <div class="aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-black relative shadow-inner border border-white/5 group">
             
             <div v-if="isCameraOpen || capturedImage" class="h-full relative overflow-hidden">
