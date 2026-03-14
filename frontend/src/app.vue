@@ -352,8 +352,8 @@ const analysisResult = ref(null)
 const apiError = ref(null)
 const capturedImage = ref(null)
 
-// عنوان الـ API: من متغير البيئة في Vercel أو القيمة الافتراضية للتطوير المحلي
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000"
+// عنوان الـ API: الباك إند على Hugging Face (أو من VITE_API_URL للتطوير المحلي)
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "https://maramm12-skin-analyzer-api.hf.space"
 
 const summaryText = computed(() => {
   if (!analysisResult.value || !analysisResult.value[currentLang.value]) return ""
@@ -416,15 +416,15 @@ const sendToServer = async (file) => {
   loading.value = true
   analysisResult.value = null
   apiError.value = null
-  
+
   const form = new FormData()
-  form.append("file", file)
+  form.append("file", file) // المفتاح "file" يطابق FastAPI: file: UploadFile = File(...)
 
   try {
     const res = await axios.post(
       `${API_BASE_URL}/analyze`,
       form,
-      { 
+      {
         headers: { "Content-Type": "multipart/form-data" },
         timeout: 60000
       }

@@ -10,11 +10,19 @@ import hashlib
 
 load_dotenv()
 
+# قراءة مفتاح الـ API من متغيرات البيئة (مطلوب لـ Hugging Face Spaces)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY must be set in environment variables.")
+
+genai.configure(api_key=GEMINI_API_KEY)
+
 app = FastAPI()
 
 # Cache للنتائج لضمان الاتساق
 analysis_cache = {}
 
+# السماح لجميع الـ origins (Vue.js على Vercel وغيره) بالوصول للـ API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,8 +30,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # الموديل زي ما هو بناءً على طلبك مع تفعيل نظام الـ Determinism لثبات النتائج
 model = genai.GenerativeModel(
@@ -52,89 +58,80 @@ async def analyze_skin(file: UploadFile = File(...)):
 
         image = Image.open(io.BytesIO(image_bytes))
 
-        # Deterministic clinical prompt — user-defined v2
-        prompt = """ACT AS: A Board-Certified Dermatologist and AI Skin Imaging Specialist.
+        # تقرير طبي احترافي للمنظور (تحليل البشرة) — بدون نسب مئوية، تحليل لحالة البشرة + نصائح روتين
+        prompt = """You are a Board-Certified Dermatologist and AI Skin Imaging Specialist.
 
-TASK: Perform a clinical-grade digital facial skin analysis based strictly on visible evidence in the provided facial image.
+TASK: Produce a professional medical skin analysis report (تقرير طبي احترافي لتحليل البشرة) based ONLY on visible evidence in the provided facial image.
 
-SCIENTIFIC CONSISTENCY RULE (CRITICAL):
-The analysis MUST be deterministic.
-The same image must always produce the same observations and conclusions.
-Base all conclusions strictly on visible dermatological indicators such as pore visibility, lesion count, redness patches, pigmentation spots, texture irregularities, dryness signs, and oil shine.
-Do NOT guess medical history or non-visible conditions.
+IMPORTANT:
+- Do NOT output percentages or numeric scores. Output descriptive analysis only.
+- Be deterministic: the same image must always yield the same report.
+- Base everything on what is visible: skin type, texture, hydration signs, pigmentation, pores, redness, acne/breakouts, etc. Do not guess medical history.
 
-AGE ESTIMATION RULE:
-Estimate the approximate age range based on fine lines, skin elasticity, wrinkle depth, skin smoothness, and facial structure.
-Return an age range such as: "20-25", "25-30", "30-35".
-
-PHASE 0 — IMAGE VALIDATION
-Verify that: a single human face is clearly visible, the face is sufficiently illuminated, skin areas are observable.
-If the image is invalid return:
+IMAGE VALIDATION:
+If no single clear human face is visible, or lighting is too poor, return ONLY this JSON (no other text):
 {"status":"error","message_en":"Clear human face not detected.","message_ar":"لم يتم اكتشاف وجه بشري واضح."}
 
-PHASE 1 — CLINICAL VISUAL ANALYSIS
-Evaluate the following dermatological indicators:
-Acne / Breakouts, Hydration level, Skin redness / irritation, Skin texture smoothness, Pigmentation and tone uniformity, Pore visibility and size, Rosacea pattern indicators.
-All observations must be short clinical descriptions based strictly on visible evidence.
+OUTPUT FORMAT:
+Return a SINGLE valid JSON object only. No markdown, no code fences, no extra text. Structure:
 
-PHASE 2 — PROFESSIONAL REPORT GENERATION
-Create a structured dermatological report including:
-• Skin type classification
-• Approximate age range
-• Overall skin condition assessment
-• Individual clinical observations
-• Key skin concerns
-• Recommended skincare actions
-• Suggested daily routine
-Avoid exaggerated medical claims.
-
-PHASE 3 — OUTPUT FORMAT
-Return ONLY the following JSON structure:
 {
-"status":"success",
-"en":{
-"report_header":{
-"skin_type":"",
-"overall_assessment":"",
-"approximate_age":"",
-"analysis_confidence":"High / Medium"
-},
-"clinical_observations":{
-"Acne":"","Hydration":"","Redness":"","Texture":"","Pigmentation":"","Pores":"","Rosacea":""
-},
-"key_skin_concerns":["","",""],
-"routine_recommendations":["","",""],
-"daily_routine":{
-"morning":["Gentle cleanser","Vitamin C serum","Moisturizer","SPF 50 sunscreen"],
-"evening":["Cleanser","Treatment serum","Moisturizer"]
-},
-"clinical_summary":"2-3 sentence professional dermatological summary."
-},
-"ar":{
-"report_header":{
-"skin_type":"",
-"overall_assessment":"",
-"approximate_age":"",
-"analysis_confidence":"عالية / متوسطة"
-},
-"clinical_observations":{
-"Acne":"","Hydration":"","Redness":"","Texture":"","Pigmentation":"","Pores":"","Rosacea":""
-},
-"key_skin_concerns":["","",""],
-"routine_recommendations":["","",""],
-"daily_routine":{
-"morning":["غسول لطيف","سيروم فيتامين سي","مرطب","واقي شمس SPF 50"],
-"evening":["غسول","سيروم علاجي","مرطب"]
-},
-"clinical_summary":"ملخص طبي احترافي من 2-3 جمل."
-}
+  "status": "success",
+  "en": {
+    "report_header": {
+      "skin_type": "e.g. Oily, Dry, Combination, Normal, Sensitive",
+      "overall_assessment": "2-3 sentence professional assessment of current skin condition",
+      "approximate_age": "e.g. 20-25, 25-30",
+      "analysis_confidence": "High or Medium"
+    },
+    "clinical_observations": {
+      "Acne": "short descriptive observation",
+      "Hydration": "short descriptive observation",
+      "Redness": "short descriptive observation",
+      "Texture": "short descriptive observation",
+      "Pigmentation": "short descriptive observation",
+      "Pores": "short descriptive observation",
+      "Rosacea": "short descriptive observation"
+    },
+    "key_skin_concerns": ["concern 1", "concern 2", "concern 3"],
+    "routine_recommendations": ["recommendation 1", "recommendation 2", "recommendation 3"],
+    "daily_routine": {
+      "morning": ["step 1", "step 2", "step 3", "step 4"],
+      "evening": ["step 1", "step 2", "step 3"]
+    },
+    "clinical_summary": "2-3 sentence professional dermatological summary of the analysis."
+  },
+  "ar": {
+    "report_header": {
+      "skin_type": "مثال: دهنية، جافة، مختلطة، عادية، حساسة",
+      "overall_assessment": "جملتان أو ثلاث لتقييم حالة البشرة",
+      "approximate_age": "مثال: 20-25، 25-30",
+      "analysis_confidence": "عالية أو متوسطة"
+    },
+    "clinical_observations": {
+      "Acne": "ملاحظة سريرية قصيرة",
+      "Hydration": "ملاحظة سريرية قصيرة",
+      "Redness": "ملاحظة سريرية قصيرة",
+      "Texture": "ملاحظة سريرية قصيرة",
+      "Pigmentation": "ملاحظة سريرية قصيرة",
+      "Pores": "ملاحظة سريرية قصيرة",
+      "Rosacea": "ملاحظة سريرية قصيرة"
+    },
+    "key_skin_concerns": ["مشكلة 1", "مشكلة 2", "مشكلة 3"],
+    "routine_recommendations": ["توصية 1", "توصية 2", "توصية 3"],
+    "daily_routine": {
+      "morning": ["خطوة 1", "خطوة 2", "خطوة 3", "خطوة 4"],
+      "evening": ["خطوة 1", "خطوة 2", "خطوة 3"]
+    },
+    "clinical_summary": "ملخص طبي احترافي من 2-3 جمل."
+  }
 }
 
-CRITICAL RULES:
-1. Return ONLY the JSON object. Do NOT include markdown, explanations, or extra text.
-2. All clinical observations must be based strictly on visible evidence in the image.
-3. approximate_age must ALWAYS be filled.
-4. The analysis must remain deterministic and reproducible for the same image.
+RULES:
+1. Output ONLY the JSON object. No markdown, no explanations.
+2. Fill every field. approximate_age and skin_type are required.
+3. clinical_observations: short descriptive text per category, no percentages.
+4. key_skin_concerns: list of main issues to address. routine_recommendations: actionable tips. daily_routine: concrete morning/evening steps.
 """
 
         # Try calling the AI model separately so we can return a clear 500 error
@@ -167,4 +164,10 @@ CRITICAL RULES:
                 "message_ar": f"فشل التحليل: {str(e)}"
             }
         }
+
+
+# تشغيل السيرفر على البورت 7860 والـ host 0.0.0.0 (مطلوب لـ Hugging Face Spaces)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7860)
 
