@@ -352,8 +352,8 @@ const analysisResult = ref(null)
 const apiError = ref(null)
 const capturedImage = ref(null)
 
-// عنوان الـ API: الباك إند على Hugging Face (أو من VITE_API_URL للتطوير المحلي)
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "https://maramm12-skin-analyzer-api.hf.space"
+// عنوان الباك إند على Hugging Face (أو VITE_API_URL للتطوير المحلي)
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? "https://maramm12-skin-analyzer-api.hf.space").replace(/\/$/, "")
 
 const summaryText = computed(() => {
   if (!analysisResult.value || !analysisResult.value[currentLang.value]) return ""
