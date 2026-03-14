@@ -36,7 +36,7 @@
     <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start relative">
 
       <!-- Scanning Module -->
-      <section class="lg:col-span-5 sticky top-10 z-20 animate-fade-left">
+      <section class="lg:col-span-5 lg:sticky top-10 z-30 animate-fade-left">
         <div class="relative z-20 glass-premium bg-[#050505]/95 rounded-[3rem] p-5 border border-white/10 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.9)] overflow-hidden">
           <div class="aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-black relative shadow-inner border border-white/5 group">
             
@@ -86,7 +86,7 @@
       </section>
 
       <!-- Analysis Results -->
-      <section class="lg:col-span-7 animate-fade-right">
+      <section class="lg:col-span-7 mt-10 lg:mt-0 animate-fade-right">
         
         <div v-if="!analysisResult && !loading && !apiError" class="h-[600px] glass-premium rounded-[3rem] flex flex-col items-center justify-center p-16 text-center border-dashed border-2 border-white/10">
           <div class="relative mb-10">
@@ -478,7 +478,7 @@ body { background: #050505; color: #e0e0e0; overflow-x: hidden; }
 
 .glass-premium { 
   backdrop-filter: blur(40px) saturate(180%); 
-  background: rgba(255, 255, 255, 0.03); 
+  background: #050505; 
   border: 1px solid rgba(255, 255, 255, 0.08); 
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
