@@ -1,15 +1,12 @@
 <template>
   <div :class="['min-h-screen bg-[#050505] text-[#e0e0e0] p-4 md:p-10 selection:bg-cyan-500/30 transition-all duration-700 font-roboto-condensed', currentLang === 'ar' ? 'text-right' : 'text-left']" :dir="currentLang === 'ar' ? 'rtl' : 'ltr'">
     
-    <header class="max-w-6xl mx-auto flex justify-between items-center mb-16 animate-fade-down">
-      <div class="space-y-1">
-        <h1 class="text-3xl md:text-4xl font-black tracking-tighter text-white inline-flex items-center gap-2">
+    <header class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 mb-12 animate-fade-down">
+      <div class="text-center md:text-left">
+        <h1 class="text-2xl md:text-4xl font-black tracking-tighter text-white inline-flex items-center gap-2">
           <span class="bg-cyan-600 px-3 py-1 rounded-xl text-black italic shadow-lg shadow-cyan-600/20">SM</span>
           SKIN MIRROR <span class="text-cyan-500">AI</span>
         </h1>
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em] opacity-80">
-          {{ currentLang === 'ar' ? 'مختبر تحليل البشرة الرقمي | النسخة الاحترافية' : 'Digital Skin Analysis Lab | Professional Version' }}
-        </p>
       </div>
 
       <div class="flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-xl">
